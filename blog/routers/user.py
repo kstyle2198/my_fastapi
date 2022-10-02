@@ -6,7 +6,11 @@ from typing import List
 from passlib.context import CryptContext
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/user",
+    tags=["User"]
+    
+)
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -17,7 +21,7 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return pwd_context.hash(password)
 
-@router.post('/user',response_model= schemas.ShowUser, tags=["User"], status_code=status.HTTP_201_CREATED)
+@router.post('/',response_model= schemas.ShowUser, status_code=status.HTTP_201_CREATED)
 def create_user(request: schemas.User, db: Session= Depends(database.get_db)):
     hashedPassword = get_password_hash(request.password)
     new_user = models.User(name=request.name, email=request.email, password=hashedPassword)
@@ -26,7 +30,7 @@ def create_user(request: schemas.User, db: Session= Depends(database.get_db)):
     db.refresh(new_user)
     return new_user
 
-@router.get('/user/{id}',response_model= schemas.ShowUser, status_code=status.HTTP_200_OK, tags= ["User"])
+@router.get('/{id}',response_model= schemas.ShowUser, status_code=status.HTTP_200_OK)
 def get_user(id:str, db: Session= Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.id==id).first()
     if not user:

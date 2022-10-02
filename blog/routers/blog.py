@@ -6,16 +6,20 @@ from typing import List
 from passlib.context import CryptContext
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/blog",
+    tags= ["Blog"]
+    
+)
 
 
-@router.get("/blog", response_model= List[schemas.ShowBlog], tags= ["Blog"])
+@router.get("/", response_model= List[schemas.ShowBlog],)
 def all(db:Session = Depends(database.get_db)):
     blogs = db.query(models.Blog).all()
     return blogs
 
 
-@router.post("/blog", tags= ["Blog"], status_code=status.HTTP_201_CREATED)   # create Post API
+@router.post("/", status_code=status.HTTP_201_CREATED)   # create Post API
 def create_post(request: schemas.Blog, db: Session= Depends(database.get_db)):
     new_blog = models.Blog(title=request.title, description=request.description, user_id="1")
     db.add(new_blog)
@@ -24,14 +28,14 @@ def create_post(request: schemas.Blog, db: Session= Depends(database.get_db)):
     return new_blog
 
 
-@router.get("/blog/{id}", response_model= schemas.ShowBlog,status_code=status.HTTP_200_OK, tags= ["Blog"])
+@router.get("/{id}", response_model= schemas.ShowBlog,status_code=status.HTTP_200_OK)
 def get_post(id:str, db:Session = Depends(database.get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id==id).first()
     if not blog:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} not found")
     return blog
 
-@router.delete("/blog/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Blog"])
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id:str, db:Session = Depends(database.get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id==id)
     if not blog.first():
@@ -41,7 +45,7 @@ def delete_post(id:str, db:Session = Depends(database.get_db)):
     db.commit()
     return "deleted successfully"
 
-@router.put("/blog/{id}", status_code=status.HTTP_202_ACCEPTED, tags=["Blog"])
+@router.put("/{id}", status_code=status.HTTP_202_ACCEPTED)
 def update_post(id:str, request: schemas.Blog, db: Session= Depends(database.get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id==id)
     if not blog.first():

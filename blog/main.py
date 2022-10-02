@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, status, HTTPException
 from . import schemas, models
 from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
+from typing import List
 
 
 app = FastAPI()
@@ -23,12 +24,12 @@ def create_post(request: schemas.Blog, db: Session= Depends(get_db)):
     db.refresh(new_blog)
     return new_blog
 
-@app.get("/blog", tags= ["Blog"])
+@app.get("/blog", response_model= List[schemas.ShowBlog], tags= ["Blog"])
 def all(db:Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()
     return blogs
 
-@app.get("/blog/{id}", status_code=status.HTTP_200_OK, tags= ["Blog"])
+@app.get("/blog/{id}", response_model= schemas.ShowBlog,status_code=status.HTTP_200_OK, tags= ["Blog"])
 def get_post(id:str, db:Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id==id).first()
     if not blog:

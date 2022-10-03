@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from .. import schemas, database, models
+from .. import schemas, database, models, token
 from sqlalchemy.orm import Session
 from ..repository import user
+from datetime import datetime, timedelta
 
 
 router = APIRouter(
@@ -18,8 +19,12 @@ def login(request: schemas.Login, db:Session = Depends(database.get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incorrect Password")
 
     # generate the JWT token
+    access_token_expires = timedelta(minutes=token.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = token.create_access_token(
+        data={"sub": user1.email}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
 
-    return user1
 
 
 

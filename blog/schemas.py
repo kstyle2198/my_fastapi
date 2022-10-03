@@ -33,3 +33,9 @@ class ShowBlog(BaseModel):
         orm_mode = True
     pass
 
+class Login(BaseModel):
+    username: str
+    password: str
+    
+    
+

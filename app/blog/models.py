@@ -12,6 +12,8 @@ class Blog(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     
     creator = relationship("User", back_populates="blogs")
+    class Meta:
+        ordering  =  [ '-id' ]
     
     
 class User(Base):

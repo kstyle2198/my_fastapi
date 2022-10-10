@@ -15,8 +15,8 @@ def get_password_hash(password):
 def create_user(request: schemas.User, db: Session):
     hashedPassword = get_password_hash(request.password)
     new_user = models.User(name=request.name, email=request.email, password=hashedPassword)
-    duplicate_check = db.query(models.User).filter(models.User.email==request.email).first()
-    if not duplicate_check: 
+    duplicate_user_check = db.query(models.User).filter(models.User.email==request.email).first()
+    if not duplicate_user_check: 
         db.add(new_user)
         db.commit()
         db.refresh(new_user)

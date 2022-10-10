@@ -15,10 +15,15 @@ def get_post(id, db: Session):
 
 def create_post(request: schemas.Blog, db: Session):
     new_blog = models.Blog(title=request.title, description=request.description, user_id="1")
-    db.add(new_blog)
-    db.commit()
-    db.refresh(new_blog)
-    return new_blog
+    duplicate_title_check = db.query(models.Blog).filter(models.Blog.title==request.title).first()
+    if not duplicate_title_check:
+        db.add(new_blog)
+        db.commit()
+        db.refresh(new_blog)
+        return new_blog
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"중복된 제목의 글입니다.")
+
     
 def delete_post(id, db: Session):
     blog = db.query(models.Blog).filter(models.Blog.id==id)

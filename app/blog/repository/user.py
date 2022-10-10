@@ -15,10 +15,15 @@ def get_password_hash(password):
 def create_user(request: schemas.User, db: Session):
     hashedPassword = get_password_hash(request.password)
     new_user = models.User(name=request.name, email=request.email, password=hashedPassword)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
+    duplicate_check = db.query(models.User).filter(models.User.email==request.email).first()
+    if not duplicate_check: 
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        return new_user
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"이미 등록된 이메일입니다.")
+        
 
 def get_user(id:str, db: Session):
     user = db.query(models.User).filter(models.User.id==id).first()
